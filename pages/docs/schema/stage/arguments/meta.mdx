@@ -1,0 +1,90 @@
+---
+sidebar_position: 4
+---
+
+import { Callout } from "nextra/components";
+
+# Stage Meta configuration
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.5.0
+</Callout>
+
+
+Stage Meta-Configuration in Togomak consists of specific properties that allow you to control and customize the behavior of individual stages within your automation workflows. These properties provide essential metadata and decision-making capabilities for stages, ensuring proper execution and coordination.
+
+```hcl title=togomak.hcl
+togomak {
+  version = 2
+}
+
+stage "my_stage" {
+  name = "Data Processing"
+  depends_on = [stage.another_stage]
+  script = "echo this runs second"
+}
+
+stage "another_stage" {
+  if = 3 != 4
+  script = "echo this runs first"
+}
+```
+
+## `name`
+
+Specifies a friendly and human-readable name for the stage.
+
+This property is optional but recommended. Providing a meaningful name helps you identify the purpose or role of each stage within your Togomak configuration. It enhances clarity and makes the configuration more readable.
+
+## `depends_on`
+
+Defines a list of dependencies that a stage needs to wait for before executing.
+
+This property is optional but crucial for managing the execution order of stages. By specifying dependencies, you ensure that certain stages complete before others start. Dependencies are referenced using Togomak references, such as `stage.<name_of_stage>`. This property is particularly useful when one stage relies on the output or results of another.
+
+## `if`
+
+Accepts a boolean value that determines whether the stage should be executed or skipped based on the condition's result.
+
+This property is optional and provides a way to conditionally run or skip stages. If stages are [whitelisted][filter] as command-line arguments in the Togomak CLI, the `if` property takes precedence over command-line arguments. It allows you to make execution decisions based on specific conditions, making your automation more dynamic. However, if the stage [explicitly whitelisted][filter] using the `+` operator on Togomak
+Command Line Arguments, the result of the `if` property is ignored.
+
+For example, take a look at the following script:
+
+```hcl title=togomak.hcl
+togomak {
+  version = 2
+}
+
+stage "build" {
+  script = "echo running build"
+}
+
+stage "test" {
+  if = false
+  script = "echo running test"
+}
+```
+
+The above script may run only the `stage.build` stage when run using the following command
+
+```bash
+togomak
+```
+
+However, when its [explicitly whitelisted][filter], you can force the `stage.test` stage to run as well.
+
+```bash
+togomak +test
+```
+
+And you can run only the `stage.test` stage with the following
+command
+
+```bash
+togomak root +test
+```
+
+To learn more on how [filtering][filter] works, check out the [Command Line](../../../cli/intro.md) docs.
+
+[filter]: ../../../cli/filtering.md

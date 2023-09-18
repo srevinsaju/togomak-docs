@@ -1,0 +1,80 @@
+---
+sidebar_position: 5
+---
+
+import { Callout } from "nextra/components";
+
+# Stage Scripting configuration
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.0.0
+</Callout>
+
+Scripting Configuration in Togomak allows you to define and execute shell scripts as part of your automation workflows. It provides you with the flexibility to run custom scripts, commands, or programs within the context of a Togomak stage. The scripting configuration includes several key elements. Here is an example
+
+Using `script`,
+
+```hcl title=togomak.hcl
+togomak {
+  version = 2
+}
+
+stage "hello_world" {
+  script = "echo hello world"
+}
+```
+
+And using `args`
+
+```hcl
+togomak {
+  version = 2
+}
+
+stage "ubuntu" {
+  container {
+    image = "ubuntu:latest"
+  }
+  args = ["apt", "update"]
+}
+```
+
+Running a python script
+
+```hcl
+togomak {
+  version = 2
+}
+
+stage "python" {
+  shell = "python3"
+  script = <<-EOT
+  -c
+  print("hello world from Python")
+  EOT
+}
+```
+
+## `dir`
+
+Specifies the working directory in which the script will be executed.
+
+This property is optional. If not specified, the working directory defaults to the directory where the Togomak configuration file is located. Specifying a working directory allows you to control where the script operates, ensuring that it has access to the necessary files and resources.
+
+## `script`
+
+Accepts a multiline shell script to be executed using a specified shell interpreter.
+
+This property is optional, but either script or args should be defined. The script can include one or more shell commands or statements. It provides the core functionality that the stage performs. Ensure that the specified shell interpreter is available on the host where the script will run.
+
+## `args`
+
+Accepts a list of arguments that can be passed to the script.
+
+This property is optional, but either script or args should be defined. The script arguments allow you to parameterize your script, making it more versatile and adaptable to different scenarios.
+
+## `shell`
+
+Specifies the name or path of the shell interpreter to be used for executing the script.
+
+This property is optional. If not specified, Togomak will attempt to use a default shell such as bash or sh. However, specifying the shell is recommended for clarity and to ensure consistent behavior across different environments.

@@ -1,0 +1,9 @@
+# Data Providers
+
+The `data` block receives the data from data providers. There are two kinds of such providers:
+
+- [**Built-in Providers**](./built-in/): Bundled along with `togomak`, as part of the same
+  source code.
+- [**External Providers**](./contrib.md): These providers are loaded dynamically, likely from
+  a third-party registry, and are launched as subprocess and executes with the help of
+  [hashicorp/go-plugin](https://github.com/hashicorp/go-plugin).

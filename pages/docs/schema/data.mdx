@@ -1,0 +1,17 @@
+# Data Blocks
+
+The `data` block allows fetching static data from different sources known 
+as `data_providers`. Common providers include examples like environment variables,
+file sources, or an external secrets manager, like Hashicorp Vault or Google 
+Secret Manager. 
+
+A basic `data` block looks like this:
+```hcl 
+data "provider_name" "id" {
+    ...
+    default = "???"
+}
+```
+
+Here, the data block uses the provider, `provider_name` to retrieve information.
+The retrieved value will be stored, and can be accessed `data.provider_name.id.value`.

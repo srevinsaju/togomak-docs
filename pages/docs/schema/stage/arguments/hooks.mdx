@@ -1,0 +1,70 @@
+---
+
+---
+
+import { Callout } from "nextra/components";
+
+# Stage Hooks configuration
+
+## `pre_hook`
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.5.0
+</Callout>
+
+Pre-Hooks are stages that run immediately before the execution of the primary stage.
+They are defined using the `pre_hook` block in your Togomak configuration.
+Pre-hooks are typically used for tasks that prepare the environment or perform setup
+actions necessary for the main stage's success.
+
+- **Execution Order**: Pre-hooks execute before the primary stage.
+- **Dependency Relationship**: Pre-hooks can have their dependencies, just like any other stage. This ensures that certain pre-processing tasks are completed before the main stage starts.
+- **Use Cases**: Pre-hooks are useful for actions such as environment setup, data preparation, or resource provisioning that need to be in place before the main task begins.
+- **Customization**: You can configure pre-hooks with their own parameters, environment variables, and any other relevant settings.
+
+### Example
+
+```hcl showLineNumbers title="togomak.hcl"
+togomak {
+  version = 2
+}
+
+stage "hello" {
+  pre_hook {
+    stage {
+      script = "echo running before the main script in pre-hook"
+    }
+  }
+  script = "echo running in the hello stage"
+}
+```
+
+## `post_hook`
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.5.0
+</Callout>
+
+Post-Hooks are stages that run immediately after the main stage completes, regardless of whether the primary stage succeeded or failed. They are defined using the post_hook block in your Togomak configuration. Post-hooks are commonly used for tasks that clean up resources, generate reports, or trigger notifications after the primary stage's execution.
+
+- **Execution Order**: Post-hooks execute after the primary stage, even if the primary stage fails.
+- **Dependency Relationship**: Post-hooks can also have dependencies, ensuring that certain tasks run in a specific order after the main stage.
+- **Use Cases**: Post-hooks are useful for actions like logging, resource cleanup, reporting, and notifications, which should occur regardless of the main stage's outcome.
+- **Customization:** Similar to pre-hooks, you can configure post-hooks with specific parameters, environment variables, and settings tailored to their
+
+### Example
+
+```hcl showLineNumbers title="togomak.hcl"
+togomak {
+  version = 2
+}
+
+stage "hello" {
+  script = "echo running in the hello stage"
+  post_hook {
+    stage {
+      script = "the stage completed with status ${this.status}"
+    }
+  }
+}
+```

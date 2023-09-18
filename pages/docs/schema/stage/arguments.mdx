@@ -1,0 +1,34 @@
+
+# Arguments
+
+## Meta arguments
+
+These arguments are responsible for controlling the flow and providing essential metadata for stages within a Togomak configuration.
+
+- [`name`](./meta.md)
+- [`depends_on`](./meta.md)
+- [`if`](./meta.md)
+
+## Scripting
+
+These blocks are used to configure and control the execution of shell scripts within a stage, providing options for specifying the script content, shell interpreter, working directory, and script arguments
+
+- [`dir`](./scripting.md)
+- [`script`](./scripting.md)
+- [`shell`](./scripting.md)
+- [`args`](./scripting.md)
+
+## Hooks
+
+These blocks are used to define actions that run immediately before (pre_hook) or after (post_hook) the main stage's execution. They allow you to set up pre-processing or post-processing tasks that are closely tied to the primary stage's operation.
+
+- [`pre_hook`](./hooks.md)
+- [`post_hook`](./hooks.md)
+
+## Configuration Blocks
+
+- [`use`](./use.md)
+- [`daemon`](./daemon.md)
+- [`retry`](./retry.md)
+- [`container`](./container.md)
+- [`environment`](./environment.md)
