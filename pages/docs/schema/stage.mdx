@@ -9,3 +9,23 @@ import { Callout } from "nextra/components";
 In Togomak, a `stage` is like a small, independent task that can perform various operations, such as running scripts, executing Docker containers, setting environment variables, and more. It's a fundamental building block for defining and orchestrating actions within Togomak.
 
 Think of a stage as a unit of work that you can configure and control.
+
+
+
+import { Cards, Card } from 'nextra/components'
+ 
+<Cards>
+  <Card title="Overview" href="./stage/overview" />
+  <Card title="Arguments" href="./stage/arguments" />
+</Cards>
+
+```hcl filename="togomak.hcl"
+togomak {
+  version = 2
+}
+
+stage "hello" {
+  script = "echo hello world"
+}
+```
+

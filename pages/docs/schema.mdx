@@ -1,13 +1,36 @@
 # Configuration
 
 import { Cards, Card } from 'nextra/components'
- 
-<Cards>
-  <Card title="Stage" href="./schema/stage" />
-  <Card title="Data" href="./schema/data" />
-  <Card title="Macro" href="./schema/macro" />
-  <Card title="Import" href="./schema/import" />
-  <Card title="Togomak" href="./schema/togomak" />
 
-  <Card title="Locals" href="./schema/locals" />
+In togomak, everything is defined as a "runnable" using an 
+HCL block. A standard HCL block looks like this 
+
+```hcl
+block_type "id" {
+  arg1 = value1
+  arg2 = {
+    key = "value"
+  }
+
+  sub_block {
+    id = "value"
+  }
+}
+```
+For a detailed understanding of togomak HCL syntax, we recommend 
+[**🔗 Terraform's Guide to HCL Syntax**](https://developer.hashicorp.com/terraform/language/syntax)
+
+Multiple blocks can be placed in different files under the same directory, or 
+could be [imported](./schema/import). Here are the supported togomak blocks: 
+
+
+<Cards>
+  <Card title="🏃 Stage" href="./schema/stage" />
+  <Card title="📚 Data" href="./schema/data" />
+  <Card title="📜 Macro" href="./schema/macro" />
+  <Card title="🚛 Import" href="./schema/import" />
+
+  <Card title="📍 Locals" href="./schema/locals" />
+
+  <Card title="🧲 Togomak" href="./schema/togomak" />
 </Cards>

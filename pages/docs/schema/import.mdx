@@ -19,9 +19,61 @@ specifies the source, which should be a constant value, and could
 be a local file, 
 
 ## Example usage
-```hcl
-{{#include ../../../examples/import/togomak.hcl}}
+
+For the following file structure, 
+
+import { FileTree } from 'nextra/components'
+ 
+<FileTree>
+  <FileTree.File name="togomak.hcl" />
+  <FileTree.Folder name="module" defaultOpen>
+    <FileTree.File name="togomak.hcl" />
+    <FileTree.Folder name="child" defaultOpen >
+      <FileTree.File name="togomak.hcl" />
+    </FileTree.Folder>
+  </FileTree.Folder>
+</FileTree>
+
+```hcl filename="togomak.hcl" copy 
+togomak {
+  version = 2
+}
+
+import {
+  source = "./module"
+}
+
+stage "main" {
+  script = "echo script from the main file"
+}
+
+import {
+  source = "git::https://github.com/srevinsaju/togomak-first-module"
+}
 ```
+```hcl filename="module/togomak.hcl" copy 
+togomak {
+  version = 2
+}
+
+stage "another_stage" {
+  script = "echo this is coming from module"
+}
+
+import {
+  source = "./child"
+}
+```
+```hcl filename="module/child/togomak.hcl" copy 
+togomak {
+  version = 2
+}
+stage "child" {
+  script = "echo hello world from the child module"
+}
+```
+
+
 
 ## Argument reference 
 

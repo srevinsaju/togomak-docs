@@ -1,6 +1,6 @@
 {
-    "intro": "Intro",
-    "installation": "Installation",
-    "tutorial": "Getting Started",
-    "docs": "Documentation"
+  "index": "Intro",
+  "installation": "Installation",
+  "tutorial": "Getting Started",
+  "docs": "Documentation"
 }

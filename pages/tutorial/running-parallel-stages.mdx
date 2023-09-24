@@ -1,0 +1,168 @@
+
+# Tutorial: Running parallel stages
+
+This tutorial will take 5 minutes.
+
+import { Steps } from 'nextra/components'
+
+<Steps>
+### Installation 
+To start off, you need to have `togomak` installed on your system. 
+If you haven't installed it yet, check out the [GitHub Releases](https://github.com/srevinsaju/togomak/releases)
+to find an appropriate version for your system, or you could take a look 
+at the [installation](../../installation.mdx) too.
+
+### Project Initialization 
+
+Create a new directory for your Togomak project and navigate to it in your terminal.
+```bash copy
+mkdir tutorial-parallel-stages
+cd tutorial-parallel-stages
+```
+
+### Initializing 
+Create a file called `togomak.hcl`, this is a bare minimum pipeline 
+that is required for `togomak` to identify it as a valid pipeline. 
+
+```hcl filename="togomak.hcl" copy
+togomak {
+  version = 2
+}
+```
+
+You may give a shot executing it now,
+```ansi 
+[36mINFO[0m[0000] togomak (version=dev)
+[36mINFO[0m[0000] [90mtook 0s[0m
+```
+
+### Adding stages 
+Now, let's create your first Togomak stage. Add the following code to your `togomak.hcl` file:
+
+```hcl filename="togomak.hcl" copy
+
+stage "hello_world" {
+  script = <<-EOT
+  for i in apple orange mango; do 
+    echo Hello, World! $i
+    sleep 1
+  done
+  EOT 
+}
+
+stage "another_stage" {
+  script = <<-EOT
+  for i in go rust python; do 
+    echo I use $i
+    sleep 1
+  done
+  EOT 
+}
+```
+
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="ℹ️">
+  `<<-EOT` is called a Heredoc. If you are not familiar with this syntax, 
+  you should definitely check out [Indented Heredocs](/docs/language/expressions/strings#indented-heredocs). It's going to be handy.
+</Callout>
+
+### Run your pipeline 
+You can run your pipeline, by either using `togomak run` or just `togomak`
+
+```bash
+togomak
+```
+
+You will notice that, although `another_stage` was defined after `hello_stage`,
+both of them runs in parallel. This is because `togomak` is parallel by default.
+
+```ansi 
+[36mINFO[0m[0000] togomak (version=dev)
+[36mINFO[0m[0000] [[36mstage[0m=hello_world] [+] [34mhello_world[0m
+[36mINFO[0m[0000] [[36mstage[0m=another_stage] [+] [34manother_stage[0m
+[36mINFO[0m[0000] [[36mstage[0m=hello_world] Hello, World! apple
+[36mINFO[0m[0000] [[36mstage[0m=another_stage] I use go
+[36mINFO[0m[0001] [[36mstage[0m=another_stage] I use rust
+[36mINFO[0m[0001] [[36mstage[0m=hello_world] Hello, World! orange
+[36mINFO[0m[0002] [[36mstage[0m=hello_world] Hello, World! mango
+[36mINFO[0m[0002] [[36mstage[0m=another_stage] I use python
+[36mINFO[0m[0003] [90mtook 3.009s[0m
+```
+You will notice that the entire pipeline execution took 3 seconds.
+This is intuitively because both stages which was supposed to take 3 seconds 
+ran in parallel.
+
+### Running one stage after another 
+Now, we will modify the pipeline such that the stage, `stage.another_stage` runs 
+exactly after `stage.hello_world` completes, here is our new pipeline:
+```hcl filename="togomak.hcl" copy {15}
+togomak {
+  version = 2
+}
+
+stage "hello_world" {
+  script = <<-EOT
+  for i in apple orange mango; do 
+    echo Hello, World! $i
+    sleep 1
+  done
+  EOT 
+}
+
+stage "another_stage" {
+  depends_on = [stage.hello_world]
+  script = <<-EOT
+  for i in go rust python; do 
+    echo I use $i
+    sleep 1
+  done
+  EOT 
+}
+```
+
+Notice the new `depends_on` parameter? This implies that `stage.another_stage` 
+depends on the completion of `stage.hello_world`. Let's see how this turns out when we 
+run `togomak`. 
+```bash 
+togomak
+```
+
+```ansi
+[36mINFO[0m[0000] togomak (version=dev)
+[36mINFO[0m[0000] [[36mstage[0m=hello_world] [+] [34mhello_world[0m
+[36mINFO[0m[0000] [[36mstage[0m=hello_world] Hello, World! apple
+[36mINFO[0m[0001] [[36mstage[0m=hello_world] Hello, World! orange
+[36mINFO[0m[0002] [[36mstage[0m=hello_world] Hello, World! mango
+[36mINFO[0m[0003] [[36mstage[0m=another_stage] [+] [34manother_stage[0m
+[36mINFO[0m[0003] [[36mstage[0m=another_stage] I use go
+[36mINFO[0m[0004] [[36mstage[0m=another_stage] I use rust
+[36mINFO[0m[0005] [[36mstage[0m=another_stage] I use python
+[36mINFO[0m[0006] [90mtook 6.02s[0m
+```
+Yep, now it ran one after another. The time taken, 6 seconds proves it too.
+
+### Run a specific stage 
+
+You can run specific stages. 
+```bash
+togomak stage.another_stage
+```
+
+```ansi 
+[36mINFO[0m[0000] togomak (version=dev)
+[36mINFO[0m[0000] [[36mstage[0m=hello_world] [+] hello_world (skipped)
+[36mINFO[0m[0000] [[36mstage[0m=another_stage] [+] another_stage (overriden)
+[36mINFO[0m[0000] [[36mstage[0m=another_stage] I use go
+[36mINFO[0m[0001] [[36mstage[0m=another_stage] I use rust
+[36mINFO[0m[0002] [[36mstage[0m=another_stage] I use python
+[36mINFO[0m[0003] took 3.006s
+```
+
+### 🎉 Congratulations 
+You just learnt about how the Togomak dependency resolution and 
+default parallelism works. Note that, Togomak uses [Topological Sort](https://en.wikipedia.org/wiki/Topological_sorting) 
+to figure out the dependency tree. 
+
+</Steps>
+

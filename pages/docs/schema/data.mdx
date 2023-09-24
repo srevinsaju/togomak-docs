@@ -5,8 +5,20 @@ as `data_providers`. Common providers include examples like environment variable
 file sources, or an external secrets manager, like Hashicorp Vault or Google 
 Secret Manager. 
 
+
+import { Cards, Card } from 'nextra/components'
+ 
+
+<Cards>
+  <Card title="Providers" href="./data/providers" />
+</Cards>
+
 A basic `data` block looks like this:
-```hcl 
+```hcl
+togomak {
+  version = 2
+} 
+
 data "provider_name" "id" {
     ...
     default = "???"
@@ -15,3 +27,5 @@ data "provider_name" "id" {
 
 Here, the data block uses the provider, `provider_name` to retrieve information.
 The retrieved value will be stored, and can be accessed `data.provider_name.id.value`.
+
+ 

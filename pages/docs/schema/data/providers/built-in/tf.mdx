@@ -1,0 +1,63 @@
+import { Callout } from "nextra/components";
+
+# `tf` provider
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.4.0
+</Callout>
+
+The `tf` provider uses Terraform as a data source for your pipeline.
+Sometimes, you might want to run a integration test against a private IP
+address of a Google Cloud Compute VM - now, using the `data.tf` provider, you
+can directly use the Terraform data blocks to get data directly into your
+pipeline.
+
+By default, the Terraform Data provider runs a `terraform plan` and an `terraform apply`
+only if the plan shows no changes. This means that it can retrieve the data from data blocks.
+In certain cases, you might have to create the resource for the data to be available. In those
+cases, you may set the `allow_apply` attribute, set to True.
+
+## Requirements
+
+- `terraform`, v1.0.0 or above. Terraform compatible forks like OpenTofu is also allowed.
+  `terraform` needs to be available on `$PATH`.
+
+## Example
+
+```hcl filename="togomak.hcl" copy
+togomak {
+  version = 2
+}
+
+data "tf" "this" {
+  source = "."
+  allow_apply = true
+}
+
+
+stage "hello" {
+  script = "echo hello world"
+}
+
+stage "delayed" {
+  script = "echo Here is a random pet name: ${data.tf.this.random_pet.pet.id}"
+}
+```
+
+```tf filename="random.tf" copy
+resource "random_pet" "pet" {
+
+}
+```
+
+## Argument Reference
+
+- [`source`](#source) - (required) The source from where the Terraform files need to be sourced from.
+- [`allow_apply`](#allow_apply) - (optional) If set to false, if terraform plan shows infrastructure changes, it will fail.
+  Defaults to `false`
+- [`vars`](#vars) - (optional) - A list of string key-value pairs which would be passed to Terraform as values to `variable` block.
+
+## Attributes Reference
+
+You would reference the Terraform result like you would do in Terraform, just prefix `data.tf.<id>` before accessing the object.
+See [the example](#Example) for a sample usage on the `random_pet` resource.

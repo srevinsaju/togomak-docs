@@ -1,0 +1,68 @@
+---
+sidebar_position: 2
+---
+
+# Getting Started
+
+This tutorial will take less than 2 minutes.
+
+import { Steps } from 'nextra/components'
+
+<Steps>
+### Installation 
+To start off, you need to have `togomak` installed on your system. 
+If you haven't installed it yet, check out the [GitHub Releases](https://github.com/srevinsaju/togomak/releases)
+to find an appropriate version for your system, or you could take a look 
+at the [installation](../installation.mdx) too.
+
+### Project Initialization 
+
+Create a new directory for your Togomak project and navigate to it in your terminal.
+```bash copy
+mkdir my-first-togomak-pipeline
+cd my-first-togomak-pipeline
+```
+
+### Initializing 
+Create a file called `togomak.hcl`, this is a bare minimum pipeline 
+that is required for `togomak` to identify it as a valid pipeline. 
+
+```hcl filename="togomak.hcl" copy
+togomak {
+  version = 2
+}
+```
+
+You may give a shot executing it now,
+```ansi 
+[36mINFO[0m[0000] togomak (version=dev)
+[36mINFO[0m[0000] [90mtook 0s[0m
+```
+
+### Adding stages 
+Now, let's create your first Togomak stage. Add the following code to your `togomak.hcl` file:
+
+```hcl filename="togomak.hcl" copy
+...
+
+stage "hello_world" {
+  script = "echo hello world"
+}
+```
+
+### Run your pipeline 
+You can run your pipeline, by either using `togomak run` or just `togomak`
+
+```bash
+togomak
+```
+
+### 🎉 Congratulations 
+You just ran your first togomak pipeline! 〽️
+
+</Steps>
+
+So, what's next? If you have another 5 minutes, check out the [tutorial on Stages](./tutorial/running-parallel-stages) to get 
+an idea on the parallelism, dependency trees that togomak implements, or check out the use of [Functions](./functions) and 
+[Templating](./templating).
+

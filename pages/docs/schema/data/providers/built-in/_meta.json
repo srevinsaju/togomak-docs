@@ -1,0 +1,6 @@
+{
+  "env": "Env Provider",
+  "git": "Git Provider",
+  "prompt": "Prompt Provider",
+  "tf": "Terraform Provider"
+}

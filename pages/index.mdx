@@ -1,0 +1,67 @@
+# Intro 
+
+import { Cards, Card } from 'nextra/components'
+ 
+<Cards>
+  <Card icon="💡" title="Install" href="/docs/guide/built-ins/callout" />
+  <Card icon="🎓" title="Tutorial" href="/docs/guide/built-ins/tabs" />
+  <Card icon="ℹ️ " title="API Docs" href="/docs/guide/built-ins/steps" />
+</Cards>
+
+## What is togomak?
+
+Togomak is your DevOps Swiss Army knife, simplifying the complex world of Continuous Integration and Continuous Deployment (CI/CD) with the power of HCL (HashiCorp Configuration Language). Imagine a world where orchestrating release pipelines, building, and deploying your applications seamlessly becomes as effortless as flipping a switch.
+
+```hcl copy filename="togomak.hcl"
+togomak {
+  version = 2
+}
+
+locals {
+  tagline = "togomak is a build orchestration tool"
+}
+
+stage "greet" {
+  script = "echo ${ansifmt("green", local.tagline)}"
+}
+
+stage "hello" {
+  script = "echo Hope you have a good day!"
+}
+
+stage "sweet_container" {
+  depends_on = [stage.hello]
+  container {
+    image = "ubuntu:latest"
+  }
+  script = "cat /etc/os-release | grep PRETTY_NAME"
+}
+```
+```ansi
+$ togomak
+[36mINFO[0m [[36mstage[0m=greet] [+] greet
+[36mINFO[0m [[36mstage[0m=hello] [+] hello
+[36mINFO[0m [[36mstage[0m=hello] Hope you have a good day!
+[36mINFO[0m [[36mstage[0m=greet] togomak is a build orchestration tool
+[36mINFO[0m [[36mstage[0m=sweet_container] [+] sweet_container
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] image ubuntu:latest does not exist, pulling...
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Pulling fs layer) [42;1;39;0m [1s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Downloading) [42;1;39;0m [1s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Downloading) [42;1;39;0m [6s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Verifying Checksum) [42;1;39;0m [9s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Download complete) [[42;1;39;0m [9s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Extracting) [42;1;39;0m [9s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Pull complete) [42;1;39;0m [11s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Digest: sha256:aabed3296a3d45cede1dc866a24476c4d7e093aa806263c27ddaadbdce3c1054) [42;1;39;0m [11s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Still pulling image ubuntu:latest... (Status: Downloaded newer image for ubuntu:latest) [42;1;39;0m [11s elapsed] [0m
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] PRETTY_NAME="Ubuntu 22.04.3 LTS"
+[36mINFO[0m [[36mstage[0m=sweet_container [36m🐳[0m] Completed pulling image ubuntu:latest in [11s elapsed]
+[36mINFO[0m took 13.53s
+```
+
+
+
+
+
+Togomak acts as your CI/CD maestro, harmonizing diverse CI/CD systems like GitHub Actions, Jenkins, and Cloud Build, all through the intuitive and powerful HCL. Unlike traditional YAML-based configurations, HCL's elegance and expressiveness allow you to define your pipelines with clarity and precision.
+
