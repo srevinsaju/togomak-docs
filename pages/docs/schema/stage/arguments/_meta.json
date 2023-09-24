@@ -1,5 +1,6 @@
 {
   "hooks": "Stage Hooks",
   "meta": "Stage Meta",
-  "scripting": "Stage Scripting"
+  "scripting": "Stage Scripting",
+  "lifecycle": "Stage Lifecycles"
 }

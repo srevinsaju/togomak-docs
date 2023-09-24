@@ -1,0 +1,83 @@
+---
+sidebar_position: 6
+---
+
+import { Callout } from "nextra/components";
+
+# Stage Lifecycles 
+
+<Callout type="warning" emoji="ℹ️">
+  Alpha feature, Introduced in Togomak v2.0.0-alpha.1
+</Callout>
+
+
+A stage may have a lifecycle block to define what "phase" a stage belongs to.
+A pipeline lifecycle is made up of "phases". These could be 
+* `test` - Run unit tests here.
+* `build` - You would build a docker container here, or compile your go program. 
+* `deploy` - You would run Terraform, or push the container to the cloud.
+
+Similarly, based on the [Maven's Build Lifecycle](https://maven.apache.org/guides/introduction/introduction-to-the-lifecycle.html#a-build-lifecycle-is-made-up-of-phases)
+togomak implements a very similar feature for stages (and moving forward, modules).
+
+```hcl filename="togomak.hcl"
+togomak {
+  version = 2
+}
+
+stage "normal" {
+  script = "echo hi"
+}
+
+stage "dont_execute" {
+  if = false
+  script = "echo this shouldnt be executed && exit 1"
+}
+
+stage "docker" {
+  lifecycle {
+    phase = ["build"]
+  }
+  script = "echo docker run ..."
+}
+
+stage "terraform_fmt_check" {
+  lifecycle {
+    phase = ["deploy", "default"]
+  }
+  script = "echo terraform ..."
+}
+
+stage "terraform" {
+  depends_on = [stage.docker]
+  lifecycle {
+    phase = ["deploy"]
+  }
+  script = "echo terraform fmt -check ..."
+}
+```
+
+Take a look at the above example. Assigning stages to specific phases using Togomak's "lifecycle" block is akin to defining rules in Makefiles. Both provide structured ways to manage tasks and actions, ensuring efficient control over processes, whether it's building software with Make or automating workflows with Togomak.
+
+If you run `togomak build`, it runs all stages which has the `lifecycle.phase` set
+as `build`. 
+
+If the `lifecycle {}` block does not have any phase set, it defaults to `default`. 
+In a standard pipeline without lifecycles, all stages have the `default` lifecycle. 
+
+---
+## Arguments Reference 
+* `phase` - (optional) a list of string containing lifecycle names, for example:
+```hcl 
+stage "hello" {
+  lifecycle {
+    phase = ["build", "deploy"]
+  }
+}
+```
+
+* `timeout` - (optional) how long before the stage is forcefully killed, in seconds. 
+
+<Callout type="error" emoji="ℹ️">
+  `timeout` is not implemented in v2.0.0-alpha.1 yet
+</Callout>
