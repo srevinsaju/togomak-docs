@@ -18,6 +18,13 @@ export default {
   project: {
     link: 'https://github.com/srevinsaju/togomak',
   },
+  head: (
+    <>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta property="og:title" content="Togomak" />
+      <meta property="og:description" content="A powerful pipeline orchestrator" />
+    </>
+  ),
   footer: {
     text: (
       <span>
