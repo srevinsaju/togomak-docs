@@ -1,8 +1,18 @@
 # Usage
 
-## Basic Usage
+
+import { Callout } from 'nextra/components'
+ 
+
+<Callout type="info" emoji="ℹ️">
+  `togomak` v2 had a non-backward compatible change in how command line parameters are evaluated. 
+  If you are looking for `v1.x` usage spec, see [Usage `v1.x`](./usage_1.x.mdx). 
+</Callout>
+
+Togomak includes a query language and a rule engine to choose which stages are run. 
+
 By default, `togomak` runs all stages 
-which evaluates their condition `stage.xxx.if` to 
+which evaluates their condition `stage.*.if` to 
 `true`. By default, all stages evaluate their
 condition to true, unless explicitly 
 specified. 
@@ -13,166 +23,259 @@ just do
 togomak 
 ```
 
-and you should be good to go.
-
 If your togomak pipeline lives in a different
 directory, you could:
 ```bash
 togomak -C path/to/different/dir
 ```
 
-Similary, you can also explicitly specify 
-the path to `togomak.hcl` using the `-f` or 
-the `--file` parameter.
+## Running specific lifecycles
+A [lifecycle](../language/meta-arguments/lifecycles.mdx) is a group of stages, that needs to be run together. 
 
-## Running specific stages
-
-If you would like to run only specific 
-stages, instead of the entire pipeline,
-you could do something like this:
-
+For example, if you need to run a specific `build` lifecycle, you can use 
 ```bash 
-togomak stage1 stage2 
+togomak build
 ```
 
-This would run both `stage1`, `stage2` and 
-all the dependencies of `stage1` and `stage2`.
-That means, if there were a stage `stage3`
-which depends on `stage1`, then `stage3` would
-also be included in the same pipeline.
+You can also specify multiple lifecycles:
+```bash
+togomak build deploy test
+```
 
-Now, you can also blacklist and whitelist 
-certain stages. Let us take the specific
-example of `togomak.hcl` which is used
-to build togomak itself, at the root of 
-this repository:
+The order of the lifecycle specification is irrelevant to togomak. Togomak internally evaluates 
+a dependency tree based on actual dependencies. 
 
-```hcl
-togomak {
-  version = 2
-}
+By default, unless explicitly specified, `togomak` runs all stages, modules and macros which 
+has the `default` lifecycle. If a [`lifecycle` meta-argument](../language/meta-arguments/lifecycles.mdx) has not been specified, 
+it may assume the value of `["default"]`. 
 
 
-stage "fmt" {
-  script = "go fmt github.com/srevinsaju/togomak/v1/..."
-}
+<Callout>
+  **Example**
 
-stage "vet" {
-  script = "go vet github.com/srevinsaju/togomak/v1/..."
-}
-
-stage "build" {
-  depends_on = [stage.fmt, stage.vet]
-  script     = "go build -v -o ./cmd/togomak/togomak github.com/srevinsaju/togomak/v1/cmd/togomak"
-}
-
-stage "install" {
-  depends_on = [stage.build]
-  script     = "go install github.com/srevinsaju/togomak/v1/cmd/togomak"
-}
-
-stage "docs_serve" {
-  daemon {
-    enabled = true
+  Consider the following togomak configuration 
+  ```hcl 
+  togomak {
+    version = 2
   }
-  if     = false
-  script = "cd docs && mdbook serve"
-}
 
-```
+  stage "alice" {
+    lifecycle {
+      phase = ["default", "deploy"]
+    }
+    script = "echo hello im default, deploy"
+  }
 
-In the above example, doing `togomak build`
-would run both `stage.build` and `stage.install`.
+  stage "bob" {
+    lifecycle {
+      phase = ["deploy"]
+    }
+    script = "echo hello im deploy"
+  }
 
-However, if you would like to run only `stage.build`
-and not `stage.install`, you could do:
+  stage "eve" {
+    lifecycle {
+      phase = ["default"]
+    }
+    script = "echo hello im default"
+  }
+  ```
 
+  In the above case, lets consider the following possibilities:
+  * `togomak` - Just running `togomak` without any arguments, would produce the following outputs 
+  ```ansi 
+  [37m0000[0m [36m•[0m togomak (version=dev)
+  [37m0000[0m [36m•[0m [36mstage[0m.bob            [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.eve            [0m   hello im default
+  [37m0000[0m [36m•[0m [36mstage[0m.alice          [0m   hello im default, deploy
+  [37m0000[0m [36m•[0m took 2ms
+  ```
+  It's worthy to note, `stage.bob` was skipped. Only `stage.alice` and `stage.eve` ran. 
+
+  * `togomak default` - Running `togomak` with the `default` lifecycle, would produce the same results 
+  as that of `togomak`
+  ```ansi
+  [37m0000[0m [36m•[0m togomak (version=dev)
+  [37m0000[0m [36m•[0m [36mstage[0m.bob            [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.eve            [0m   hello im default
+  [37m0000[0m [36m•[0m [36mstage[0m.alice          [0m   hello im default, deploy
+  [37m0000[0m [36m•[0m took 2ms
+  ```
+  Same inference as the previous attempt, `stage.bob` was skipped.
+
+  * `togomak deploy` - We are explicitly requesting only for stages with the `deploy` lifecycle 
+  ```ansi
+  [37m0000[0m [36m•[0m togomak (version=dev)
+  [37m0000[0m [36m•[0m [36mstage[0m.eve            [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.alice          [0m   hello im default, deploy
+  [37m0000[0m [36m•[0m [36mstage[0m.bob            [0m   hello im deploy
+  [37m0000[0m [36m•[0m took 2ms
+  ```
+  In this scenario, `stage.eve` was skipped, but both `stage.alice` and `stage.bob` ran. 
+
+  * `togomak deploy default` - Now, we are requesting both lifecycles `default` and `deploy` to be run.
+  ```ansi
+  [37m0000[0m [36m•[0m togomak (version=dev)
+  [37m0000[0m [36m•[0m [36mstage[0m.eve            [0m   hello im default
+  [37m0000[0m [36m•[0m [36mstage[0m.bob            [0m   hello im deploy
+  [37m0000[0m [36m•[0m [36mstage[0m.alice          [0m   hello im default, deploy
+  [37m0000[0m [36m•[0m took 3ms
+  ```
+  There you have it, all three, `stage.alice`, `stage.bob` and `stage.eve` ran together.
+</Callout>
+
+So, if a specific lifecycle is not part of the `default` lifecycle phase, you can explicitly call it along with `default`
 ```bash
-togomak build ^install
+togomak default deploy
 ```
+The above will run all stages, macros and modules which has the lifecycle `default`, along with that stages, macros and modules which 
+has the `deploy` lifecycle. 
 
-
-
-The `^` operator is used as a blacklist operator.
-Similarly, if you would like to add the `stage.fmt`
-along with the stages which run, you would do:
-
+However, the following command:
 ```bash
-togomak build ^install +fmt
+togomak deploy
 ```
+... will only run the stages, macros and modules which has the lifecycle `deploy`. Anything which belongs to the `default` group will not be 
+run, furthermore, if a particular stage has both lifecycle phases `deploy` and `default`, that particular stage would be executed because 
+it contains atleast `deploy` which was explicitly requested through command line arguments. 
 
-Here, the `+` operator, is used as a whitelist operator.
-You can add multiple `+{stage_name}` and `^{stage_name}`
-and togomak would run all the stages which meet the
-criteria.
+<Callout type="info" emoji="ℹ️">
+  Even when explicitly invoked with lifecycles on togomak, the stage's `if` attribute has a higher precedence. 
+  If a stage, such as 
+  ```hcl 
+  stage "test" {
+    lifecycle {
+      phases = ["deploy"]
+    }
+    if = false
+  }
+  ```
+  and when `togomak deploy` is executed, `stage.test` will not be executed because `stage.test.if` evaluated to false. 
+  However, you can force it, using `togomak deploy +stage.test`. The `+` operator, forces the stage to run regardless of whether the 
+  block has its `if` condition evaluated to `false`
+</Callout>
 
-### Running a specific stage alone
-If you strictly want to run a single stage,
-and do not want to include its dependencies,
-or if you do not want to manually blacklist 
-all its dependencies, `togomak` has a 
-special stage called the `root` stage,
-which will run regardless of the whitelist or the 
-blacklist.
+---
 
-So, if you would like to run only `stage.build`
-and not `stage.install`, you could do:
+### Running specific stages 
 
-```bash
-togomak root +build
-```
-This translates to:
-* Run only the `root` stage (and its dependencies, which are `nil`)
-* Whitelist `build` stage
-
-> Adding multiple whitelist and blacklist entries
-> for the same stage will take no effect. The first
-> entry will be considered and the rest will be ignored.
-
-#### Whitlisting stages from a macro
-If you would like to whitelist stages from a macro,
-you could do so by using the `+` operator.
-
-```bash
-togomak macro_name.build
-```
-
-or 
-
-```bash
-togomak macro_name.root +macro_name.build
-``` 
-
-and so on.
-
-
-## Daemonize stages
-> Experimental feature, use with caution.
-
-If you would like to run a stage in the background,
-you could do so by adding the `&` operator to the
-stage name.
-
+You can request to run specific stages using the `stage.` prefix. This is true for other blocks like `macro.` and `module.` as well.
+For example, 
 ```bash 
-togomak &build
+togomak stage.alice
+```
+would only run the specific stage with the id `alice`. Effectively, we call this block overriden. 
+
+You may choose to provide multiple stage names too
+```bash
+togomak stage.alice stage.bob stage.eve
 ```
 
-This would run the `build` stage in the background,
-and will not wait for the build stage to complete
-before moving on to the next stage. However, 
-the `build` stage will be terminated once the last
-dependent of the `build` stage completes.
+A stage's `if` condition takes precendence over explicitly requested stages. You can force a certain stage to run 
+using the `+` prefix operator.
 
-Under the hood, the `build` stage will receive
-a `SIGTERM` signal, and will be given a grace period
-of 10 seconds to complete. If the stage does not
-terminate within the grace period, it will be
-forcefully killed (`SIGKILL`).
 
-The above feature is particularly useful for 
-running long running stages, such as a docker 
-service for performing integration tests.
+<Callout>
+  **Example**
 
-For extensive information about the daemonizing
-feature, refer to the [daemonizing](../features/daemonizing.md) 
-section.
+  Consider the following togomak configuration where `github_hook` has an `if` condition set to `togomak.ci`.
+  `togomak.ci` is a variable which is `true` when togomak detects that its running on a CI environment. 
+
+  Imagine you are a developer, working on this pipeline:
+
+  ```hcl 
+  togomak {
+    version = 2
+  }
+
+  stage "setup" {
+    lifecycle {
+      phase = ["default", "deploy"]
+    }
+    script = "echo im setting things up for you!"
+  }
+
+  stage "terraform" {
+    depends_on = [stage.docker, stage.setup]
+    lifecycle {
+      phase = ["deploy"]
+    }
+    script = "echo terraform apply!"
+  }
+
+  stage "github_hook" {
+    if = togomak.ci 
+    lifecycle {
+      phase = ["deploy"]
+    }
+    script = "echo curl webhook!"
+  }
+
+  stage "docker" {
+    lifecycle {
+      phase = ["default"]
+    }
+    script = "echo docker build!"
+  }
+  ```
+  Say you have already done the `stage.setup` step multiple times and you don't want to execute it every time you run `togomak deploy`. 
+  
+  Running `togomak deploy` on this gives the following output:
+  ```ansi 
+  [37m0000[0m [36m•[0m togomak (version=dev)
+  [37m0000[0m [36m•[0m [36mstage[0m.docker         [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.setup          [0m   im setting things up for you!
+  [37m0000[0m [36m•[0m [36mstage[0m.github_hook    [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.terraform      [0m   terraform apply!
+  [37m0000[0m [36m•[0m took 3ms
+  ```
+
+  If you would like to skip, just the `stage.setup` from being executed, you could add it to the exclude list using the `^`, or the negation prefix operator. 
+
+  ```bash
+  togomak deploy ^stage.setup
+  ```
+  This command translates to: "Run everything which belongs to the deploy lifecycle, except the stage called `setup`"
+  ```ansi
+  [37m0000[0m [36m•[0m togomak (version=dev)
+  [37m0000[0m [36m•[0m [36mstage[0m.github_hook    [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.setup          [0m   overridden
+  [37m0000[0m [36m•[0m [36mstage[0m.docker         [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.terraform      [0m   terraform apply!
+  [37m0000[0m [36m•[0m took 2ms
+  ```
+
+  From the above output, you would notice that the `stage.setup` was skipped.
+
+  Now, if you would like to test the `stage.github_hook`?
+  
+  ```bash
+  togomak deploy ^stage.setup +stage.github_hook
+  ```
+  
+  ```ansi 
+  [37m0000[0m [36m•[0m togomak (version=dev)
+  [37m0000[0m [36m•[0m [36mstage[0m.github_hook    [0m   overridden
+  [37m0000[0m [36m•[0m [36mstage[0m.setup          [0m   overridden
+  [37m0000[0m [36m•[0m [36mstage[0m.docker         [0m   skipped
+  [37m0000[0m [36m•[0m [36mstage[0m.github_hook    [0m   curl webhook!
+  [37m0000[0m [36m•[0m [36mstage[0m.terraform      [0m   terraform apply!
+  [37m0000[0m [36m•[0m took 3ms
+  ```
+  Yes, the `stage.github_hook` was executed this time despite `if = togomak.ci` was set. This is because the `+` operator ignores the `stage.*.if` condition, which 
+  is also the same for the `^` operator. 
+</Callout>
+
+
+---
+
+### Running all lifecycle phases
+
+There is a magic lifecycle phase which expands to every lifecycle. That is `all`
+```bash
+togomak all
+```
+would run all lifecycles including `default`, however `stage.*.if` has higher precendence, so you would like to 
+take care of that. 
+
+  
