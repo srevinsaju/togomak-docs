@@ -13,3 +13,11 @@ This property is particularly useful when one stage relies on the output or resu
 * `for_each` - Optional, Accepts a set or a map of key value pairs which will be used to run the module in parallel. See [`for_each` Meta Argument](../../language/meta-arguments/for_each.mdx) for a detailed explanation and example on how this works. 
 * `source` - Required, Accepts a string to a local directory or a remote source. See [`source` Meta Argument](../../language/meta-arguments/source.mdx) for examples and usage. 
 * `lifecycle` - Optional, determines the phase of execution of the module. See [`lifecycle` Meta Argument](../../language/meta-arguments/lifecycles.mdx) for examples and usage.
+
+---
+
+In addition, `module` accepts any arbitary amount of attributes 
+which will be passed as variables (or inputs) to the module.
+
+For the module to receive and use the value, it is required to define a 
+`variable {}` block which can utilize the value. 

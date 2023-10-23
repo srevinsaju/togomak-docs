@@ -1,0 +1,31 @@
+# Overview 
+
+## What is a Module?
+In Togomak, the module block provides a powerful mechanism for modularizing your configuration and managing complex workflows efficiently. Modules allow you to encapsulate specific functionality, making your configuration more organized and easier to maintain and reuse.
+
+## Syntax 
+
+```hcl 
+module "example" {
+  source = "./path/to/module"
+  variable1 = value1
+  variable2 = value2
+  # ...
+}
+
+```
+
+## Key Concepts 
+
+* **Encapsulation**: Modules encapsulate logic, 
+    configurations, and resources, promoting reusability and maintainability.
+* **Isolation**: Modules operate independently, 
+    avoiding interference with other parts of the configuration.
+* **Parameterization**: Modules accept variables, enabling dynamic configuration
+    based on different contexts.
+* **Source**: Modules can be sourced from local paths or remote repositories, 
+    allowing flexibility in code organization.
+
+Modules enhance the modularity and readability of your Togomak configurations, 
+enabling you to build sophisticated pipelines with ease. They facilitate 
+collaboration, code sharing, and efficient management of complex projects.

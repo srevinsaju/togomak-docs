@@ -1,1 +1,10 @@
-{}
+{
+    "stage": "Stage",
+    "data": "Data",
+    "module": "Module",
+    "local": "Locals",
+    "variables": "Variables",
+    "macro": "Macro",
+    "import": "Import",
+    "togomak": "Togomak"
+}

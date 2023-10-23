@@ -1,0 +1,45 @@
+# Variable Blocks 
+import { Callout } from "nextra/components";
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v2.0.0-alpha.6
+</Callout>
+
+You can include custom, user defined values in your pipeline using the 
+`variable {}` block. 
+The variable block derives the values in the following order:
+* from `TOGOMAK_VAR_{name}` environment variable if defined 
+* from the `*.togomak.vars` file, provided implicitly or through `-var-file` 
+* from `-var` command line arguments 
+* from user prompted input 
+* from defaults, if defined. 
+
+If none of the above gives a valid input, togomak halts with an error message. 
+
+
+```hcl
+variable "name" {
+    description = "Your first name"
+    type = string 
+    default = "Ryoji Kaji"
+}
+```
+
+When referring to them in stages or in modules, use `var.<variable_name>`, 
+for example:
+
+```hcl 
+togomak {
+  version = 2
+}
+
+variable "name" {
+    description = "Your first name"
+    type = string 
+    default = "Ryoji Kaji"
+}
+
+stage "agent" {
+  script = "echo agent name: ${var.name}"
+}
+```
