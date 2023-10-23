@@ -1,0 +1,89 @@
+import { Callout } from "nextra/components";
+
+# Module Blocks
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v2.0.0-alpha.5
+</Callout>
+
+In Togomak, a `module` can be a group of [stages](./stage.mdx) stored in a local path, remote git repository, or a cloud storage bucket. 
+A `module` block accepts a `source` argument which specifies the source togomak file. The provided path must point to a directory, 
+and the directory must contain atleast one file named `togomak.hcl`. 
+
+import { Cards, Card } from 'nextra/components'
+ 
+<Cards>
+  <Card title="Overview" href="./module/overview" />
+  <Card title="Arguments" href="./module/arguments" />
+</Cards>
+
+Compare with [`import`](./import.mdx) for a module behavior.
+
+### Example with simple modules 
+The following example loads a module from the local subdirectory, under the `./module` directory. 
+
+import { FileTree } from 'nextra/components'
+ 
+
+<FileTree>
+  <FileTree.File name="togomak.hcl" />
+  <FileTree.Folder name="module" defaultOpen>
+    <FileTree.File name="togomak.hcl" />
+  </FileTree.Folder>
+</FileTree>
+
+```hcl filename="togomak.hcl"
+togomak {
+  version = 2
+}
+
+
+module "something" {
+  source = "./module"
+}
+
+
+stage "example" {
+  script = "echo hello world from root"
+}
+```
+
+```hcl filename="module/togomak.hcl"
+togomak {
+  version = 2
+}
+stage "example" {
+  name   = "example"
+  script = "echo hello world"
+}
+```
+
+### Example with remote modules 
+
+The following example, fetches a remote module from a GitHub repository.
+
+```hcl filename="togomak.hcl"
+togomak {
+  version = 2
+}
+
+
+module "parallel" {
+  for_each = toset(["alpha", "beta", "gamma"])
+  source = "github.com/srevinsaju/togomak-first-module"
+}
+```
+
+
+<Callout type="info">
+  As a general note, [`macro` blocks](./macro.mdx) and `module` blocks are very similar in how they work. `macro` uses a child subprocess,
+  while `module` uses a goroutine. `module` blocks offer a better path resolution by correctly resolving 
+  `path.module`, `path.cwd` and `path.owd` if you are looking to resolve relative paths (relative to the module, or relative to current working directory, etc.).
+  `macro` blocks, on the other hand, do not correctly resolve `path.module`.  
+</Callout>
+
+
+
+
+
+

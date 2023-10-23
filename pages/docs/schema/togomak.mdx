@@ -1,0 +1,35 @@
+import { Callout } from "nextra/components";
+
+# Togomak Block
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.0.0
+</Callout>
+
+The `togomak {}` block is used by togomak to detect if the `.hcl` file is a togomak pipeline, or a generic HCL file. 
+It is required to have atleast one `togomak { ... }` specification in a directory where togomak is executed. 
+
+Here is a sample togomak block:
+```hcl filename="togomak.hcl"
+togomak {
+  version = 2
+}
+```
+
+## Arguments 
+* `version` - A number indicating the version of the configuration file. This version can determine, and enable feature flags 
+set within togomak, to execute running specific block types. Supports versions `1`, `2` on v1.x.y, and `2` on v2.x.y 
+
+
+## Attributes 
+In addition to the function of just being able to determine if HCL files are togomak build configurations, `togomak` block 
+also exports a set of attributes, which can be used in the pipeline, as listed below:
+
+- `version`: _string_, togomak's version 
+- `boot_time` - _string_, time at time.RFC3339
+- `boot_time_unix` - _string_, time when the command was executed in UNIX Timestamp
+- `pipeline_id` - _string_, A unique UUID generated per execution of a togomak pipeline. This is a UUIDv4 string.
+- `ci` - _boolean_, determines if Togomak is running on CI
+- `unattended` - _boolean_, determines if Togomak is run in interactive mode, if the user passed `--unattended` flag, or if stdin is attached.
+
+Each of the above may be accessed using `togomak.<attribute>`, as in `togomak.version`, `togomak.ci` and so on. 

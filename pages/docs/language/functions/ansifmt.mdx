@@ -1,0 +1,24 @@
+---
+sidebar_label: ansifmt
+description: |-
+  Returns an ANSI colored text for colored terminal output
+---
+
+# `ansifmt` Function
+
+`ansifmt` returns a formatted, colored string which may be used for terminal output. 
+It only accepts foreground colors.
+
+
+```hcl
+ansifmt(color, string)
+```
+
+## Examples
+
+```ansi
+> ansifmt("red", "Hello World")
+[31mHello World[0m
+> ansifmt("green", "Hello World")
+[32mHello World[0m
+```

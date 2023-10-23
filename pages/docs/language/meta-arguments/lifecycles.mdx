@@ -1,0 +1,78 @@
+import { Callout } from "nextra/components";
+
+
+# Lifecycle Meta-argument
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v2.0.0-alpha.1
+</Callout>
+
+
+The Lifecycle meta-argument in Togomak allows you to define the various phases to which a stage belongs. 
+In Togomak, a pipeline's lifecycle is made up of different phases, each serving a specific purpose. 
+Similar to the Maven Build Lifecycle, Togomak's lifecycle phases help you organize your pipeline stages effectively.
+
+## Defining Lifecycle Phases 
+
+To define lifecycle phases for a stage, you use the lifecycle meta-argument within the stage or your 
+module block in your Togomak configuration file. Here's the basic structure:
+```hcl 
+stage "example" {
+  script = "echo hello world"
+  lifecycle {
+    phase = ["default", "validate", "build"]
+  }
+}
+```
+
+In this example, the stage belongs to the "default", "validate", and "build" phases of the pipeline lifecycle. 
+Each phase signifies a specific stage in your CI/CD process. You can customize these phases based on your workflow requirements.
+
+## Understanding Phases in Togomak
+
+- `default`: The default phase is essential for stages that need to run in every pipeline execution. It represents the baseline phase for all stages.
+- `validate`: The validate phase is typically used for stages that perform validation checks on your code, configurations, or dependencies. 
+    It ensures that your project adheres to specific standards or guidelines.
+- `build`: Stages in the build phase are responsible for compiling code, creating binaries, or generating artifacts. 
+This phase is crucial for preparing your application for deployment.
+- `deploy`: The deploy phase includes stages that handle the deployment of your application to various environments.
+ Stages in this phase might involve pushing containers, running Terraform scripts, or deploying to cloud services.
+
+You can also create your own custom lifecycle phases, as of togomak v2.0.0-alpha.1,
+```hcl 
+stage "example" {
+  script = "echo hello world"
+  lifecycle {
+    phase = ["myphase"]
+  }
+}
+```
+And now your `stage.example` would run when you run `togomak myphase`
+
+## Overriding Lifecycle Phases 
+Unless explicitly specified, a stage or a module's lifecycle phase defaults to `["default"]`. You can override the lifecycle phases for a specific stage by employing Togomak's flexible rules system. Rules allow you to add, remove, or modify phases dynamically based on specific conditions, giving you fine-grained control over your pipeline execution.
+### Example 
+Consider a scenario where you have a stage named "test," 
+and you want it to run only in the "default" and "validate" phases of your pipeline. Here's how you can achieve this:
+
+```hcl 
+stage "test" {
+  script = "go test ./..."
+  lifecycle {
+    phase = ["default", "validate"]
+  }
+}
+```
+Similarly, if you have another stage `deploy` which you would not want to execute by default, but only when requested manually you can:
+```hcl 
+stage "terraform" {
+  script = "terraform apply -auto-approve"
+  lifecycle {
+    phase = ["deploy"]
+  }
+}
+```
+
+<Callout type="info">
+  For detailed information on how `togomak` handles lifecycle phases, see [Command Line Usage](../../usage.mdx)
+</Callout>

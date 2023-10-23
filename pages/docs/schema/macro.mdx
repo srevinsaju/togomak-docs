@@ -1,4 +1,10 @@
 # Macro Blocks
+import { Callout } from "nextra/components";
+
+<Callout type="warning">
+  Consider using [`module`](./module.mdx) instead of macros.
+</Callout>
+
 
 Macros are reusable stages. If you would like to reuse the same stage multiple times 
 in the same pipeline, with optionally different parameters, `macros` are the right 
@@ -84,6 +90,13 @@ files = {
     ...
 }
 ```
+
+<Callout type="info">
+  As a general note, `macro` blocks and `module` blocks are very similar in how they work. `macro` uses a child subprocess,
+  while `module` uses a goroutine. `module` blocks offer a better path resolution by correctly resolving 
+  `path.module`, `path.cwd` and `path.owd` if you are looking to resolve relative paths (relative to the module, or relative to current working directory, etc.).
+  `macro` blocks, on the other hand, do not correctly resolve `path.module`.  
+</Callout>
 
 
 

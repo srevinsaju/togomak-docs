@@ -1,0 +1,212 @@
+
+# Tutorial: Creating your first module
+
+This tutorial will take 5 minutes.
+
+import { Steps } from 'nextra/components'
+
+<Steps>
+### Installation 
+To start off, you need to have `togomak` installed on your system. 
+If you haven't installed it yet, check out the [GitHub Releases](https://github.com/srevinsaju/togomak/releases)
+to find an appropriate version for your system, or you could take a look 
+at the [installation](../../installation.mdx) too.
+
+### Project Initialization 
+
+Create a new directory for your Togomak project and navigate to it in your terminal.
+```bash copy
+mkdir -p tutorial-first-module/calculator
+cd tutorial-first-module/calculator
+```
+
+### Initializing 
+Create a file called `calculator/togomak.hcl`, we will put in an `add` stage which performs a sum.
+
+```hcl filename="togomak.hcl" copy
+togomak {
+  version = 2
+}
+
+variable "a" {
+  type = number
+  description = "first variable"
+}
+variable "b" {
+  type = number 
+  description = "second variable"
+}
+
+variable "operation" {
+  type = string 
+  description = "Operation to perform, any of: [add, subtract, multiply, divide]"
+}
+
+stage "add" {
+  if = var.operation == "add"
+  script = "echo ${var.a} + ${var.b} is ${var.a + var.b}"
+}
+```
+
+Try executing it now, 
+```bash 
+cd calculator 
+togomak 
+```
+It will prompt you to enter the values of `a`, `b` and `operation`. 
+
+
+### Create the caller
+Now, let's create the togomak code to invoke the module, 
+we will start by creating `./togomak.hcl` (not inside the `./calculator` directory).
+
+
+```hcl filename="togomak.hcl" copy
+togomak {
+  version = 2
+}
+
+module "add" {
+  source = "./calculator"
+  a = 3
+  b = 2
+  operation = "add"
+}
+```
+
+This implies that values `a=3`, `b=2`, `operation="add"` is 
+sent over to the module located in the subdirectory `./calculator`.
+By default, all paths specified in the `source` argument is evaluated relative 
+to [`path.module`](../docs/language/expressions/references.mdx).
+
+Trying to run this, 
+```bash 
+togomak
+```
+```ansi
+[37m0000[0m [36m•[0m togomak (version=dev)
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0m.[36mstage[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0m.[36mstage[0m.add[0m[37m][0m  3 + 2 is 5
+[37m0000[0m [36m•[0m took 4ms
+```
+
+### Customizing the values 
+You can derive the arguments passed into `module` or most other blocks such as `stage` by referencing 
+another block. 
+```hcl filename="togomak.hcl" copy
+togomak {
+  version = 2
+}
+
+locals {
+  a = 99
+  b = 1
+}
+
+module "add" {
+  source = "./calculator"
+  a = local.a
+  b = local.b
+  operation = "add"
+}
+```
+
+The above code shows how you can reference an externally defined 
+block, and derive the values for the same. Running it would give:
+```ansi 
+[37m0000[0m [36m•[0m togomak (version=dev)
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0m.[36mstage[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0m.[36mstage[0m.add[0m[37m][0m  99 + 1 is 100
+[37m0000[0m [36m•[0m took 2ms
+```
+
+### Iterating through an array of numbers using `for_each`
+Stepping this up by a level, let's say we would like to
+add several pairs of numbers:
+
+```hcl 
+locals {
+  numbers = toset([
+    {
+      a = 99
+      b = 1
+    },
+    {
+      a = 30
+      b = 40
+    },
+    {
+      a = 69
+      b = 1
+    }
+  ])
+}
+```
+Now you can do a `for_each` on each of the `local.numbers` 
+
+```hcl 
+module "add" {
+  for_each = local.numbers
+
+  source = "./calculator"
+  a = each.value.a
+  b = each.value.b
+  operation = "add"
+}
+```
+
+The full code hence becomes:
+```hcl ilename="togomak.hcl" copy
+togomak {
+  version = 2
+}
+
+locals {
+  numbers = toset([
+    {
+      a = 99
+      b = 1
+    },
+    {
+      a = 30
+      b = 40
+    },
+    {
+      a = 69
+      b = 1
+    }
+  ])
+}
+
+module "add" {
+  for_each = local.numbers
+
+  source = "./calculator"
+  a = each.value.a
+  b = each.value.b
+  operation = "add"
+}
+```
+
+Trying a run:
+```ansi 
+[37m0000[0m [36m•[0m togomak (version=dev)
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[1][0m.[36mstage[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0][0m.[36mstage[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[2][0m.[36mstage[0m.add[0m[37m][0m  
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[2][0m.[36mstage[0m.add[0m[37m][0m  99 + 1 is 100
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[0][0m.[36mstage[0m.add[0m[37m][0m  30 + 40 is 70
+[37m0000[0m [36m•[0m [37m[[0m[36mmodule[0m.add[1][0m.[36mstage[0m.add[0m[37m][0m  69 + 1 is 70
+[37m0000[0m [36m•[0m took 4ms
+```
+
+### 🎉 Congratulations 
+You just learnt about how `for_each`, modules and local blocks work in Togomak.
+If you are already familiar with `terraform` or `tofu`, this must have been 
+a piece of cake. 
+
+</Steps>
+

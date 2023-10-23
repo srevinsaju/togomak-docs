@@ -1,0 +1,15 @@
+# Arguments 
+
+`module` block accepts the following arguments:
+
+* `name` - Optional, provides a human readable display name for the stage 
+* `depends_on` - Optional, Defines a list of dependencies that a module needs to wait for before executing. 
+This property is optional but crucial for managing the execution order of stages. 
+By specifying dependencies, you ensure that certain stages complete before others start. 
+Dependencies are referenced using Togomak references, such as `module.<name_of_module>` or `stage.<name_of_stage>`. 
+This property is particularly useful when one stage relies on the output or results of another.
+
+* `if` - Optional, defaults to true. Accepts a HCL condition which can determine if the module need to be executed. 
+* `for_each` - Optional, Accepts a set or a map of key value pairs which will be used to run the module in parallel. See [`for_each` Meta Argument](../../language/meta-arguments/for_each.mdx) for a detailed explanation and example on how this works. 
+* `source` - Required, Accepts a string to a local directory or a remote source. See [`source` Meta Argument](../../language/meta-arguments/source.mdx) for examples and usage. 
+* `lifecycle` - Optional, determines the phase of execution of the module. See [`lifecycle` Meta Argument](../../language/meta-arguments/lifecycles.mdx) for examples and usage.

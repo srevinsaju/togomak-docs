@@ -1,0 +1,96 @@
+# Global Variables 
+
+The following global variables are available within togomak:
+
+import { Callout } from 'nextra/components'
+
+## `togomak.*`
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.0.0
+</Callout>
+
+See [Togomak Block](./schema/togomak.mdx) for a list of attributes the togomak block returns.
+
+
+
+## `pipeline.*` 
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.0.0
+</Callout>
+
+* `pipeline.id` - A UUID created and exported per pipeline run, which can be useful, to filter out logs for a particular pipeline given the UUID. 
+* `pipeline.path` - Path to `togomak.hcl` pipeline which initiated the build 
+* `pipeline.tempDir` - Temporary workspace directory created by togomak at the beginning of execution 
+
+
+## `cwd` 
+
+<Callout type="warning" emoji="ℹ️">
+  Introduced in Togomak v1.0.0, **Deprecated**: Use `path.root` instead 
+</Callout>
+
+`cwd` returns the directory where the `togomak.hcl` configuration file exists. This is actually the directory 
+evaluated after `--chdir` was executed, otherwise same as [`owd`](#owd)
+
+## `owd` 
+<Callout type="warning" emoji="ℹ️">
+  Introduced in Togomak v1.0.0, **Deprecated**: Use `path.cwd` instead 
+</Callout>
+
+`owd` returns the directory where the `togomak` command was invoked, i.e, before the `--chdir` flag was evaluated. 
+
+## `host*`
+<Callout type="warning" emoji="ℹ️">
+  Introduced in Togomak v1.0.0, **Deprecated**: Use `path.cwd` instead 
+</Callout>
+
+
+## `path.*`
+
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v2.0.0-alpha.5
+</Callout>
+
+Exports path related variables in togomak, similar to that of Terraform:
+* `path.root` - The path where the togomak configuration files exist.
+* `path.cwd` - The path where the togomak command was executed, before evaluating `--chdir` flag, if it was provided, else, same as `path.root`.
+* `path.module` - The path to the module, which was imported.
+
+These variables are directly influenced from OpenTofu implementation itself, see [Filesystem and Workspace Info](./language/expressions/references.mdx)
+
+## `ansi.*`
+<Callout type="info" emoji="ℹ️">
+  Introduced in Togomak v1.5.0
+</Callout>
+
+Provides helper variables for ANSI term colors, the following colors and variables are supported:
+* `ansi.bg.red` - returns `\033[41m`, the sequence for red background 
+* `ansi.fg.red` - returns `\033[31m`, the sequence for red foreground
+
+The supported background and foreground colors are:
+* `ansi.bg.red`
+* `ansi.bg.green`
+* `ansi.bg.yellow`
+* `ansi.bg.blue`
+* `ansi.bg.purple`
+* `ansi.bg.cyan`
+* `ansi.bg.white`
+* `ansi.bg.grey`
+* `ansi.fg.red`
+* `ansi.fg.green`
+* `ansi.fg.yellow`
+* `ansi.fg.blue`
+* `ansi.fg.purple`
+* `ansi.fg.cyan`
+* `ansi.fg.white`
+* `ansi.fg.grey`
+* `ansi.fg.bold`
+* `ansi.fg.italic`
+* `ansi.fg.underline`
+* `ansi.reset`
+
+`ansi.reset` is a special sequence which returns `[0m` which terminates the previous color. 
+
+There is also `ansifmt` helper function, see [`ansifmt` Function](./language/functions/ansifmt.mdx)
